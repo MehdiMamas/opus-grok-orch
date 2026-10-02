@@ -1,0 +1,21 @@
+{
+  "id": "webhook-signature",
+  "title": "Webhook signature header versus legacy header",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "decoy",
+  "prompt": "Which HTTP header and algorithm sign webhook deliveries that the dispatcher actually sends?",
+  "requiredFacts": [
+    "X-Harbor-Signature",
+    "hmac-sha256"
+  ],
+  "forbiddenFacts": [
+    "X-Legacy-Signature"
+  ],
+  "citationMustContain": [
+    "X-Harbor-Signature"
+  ],
+  "expectNotFound": false
+}

@@ -1,0 +1,11 @@
+{
+  "parentModel": "claude-opus-5-5",
+  "parentEffort": "medium",
+  "parentMode": "plan",
+  "taskTimeoutMs": 480000,
+  "tiers": {
+    "smoke": { "repeats": 1 },
+    "core": { "repeats": 1 },
+    "full": { "repeats": 3 }
+  }
+}

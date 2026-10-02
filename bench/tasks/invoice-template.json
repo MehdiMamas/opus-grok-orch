@@ -1,0 +1,21 @@
+{
+  "id": "invoice-template",
+  "title": "Invoice-ready template id",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "decoy",
+  "prompt": "Which template id does renderInvoiceReady use? Name the constant and the value.",
+  "requiredFacts": [
+    "INVOICE_READY_TEMPLATE",
+    "tpl_invoice_ready_v4"
+  ],
+  "forbiddenFacts": [
+    "tpl_invoice_ready_v1"
+  ],
+  "citationMustContain": [
+    "tpl_invoice_ready_v4"
+  ],
+  "expectNotFound": false
+}

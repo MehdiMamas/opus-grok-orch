@@ -1,0 +1,24 @@
+{
+  "id": "needle-rounding",
+  "title": "Invoice rounding buried in settle.ts",
+  "tiers": [
+    "smoke",
+    "core",
+    "full"
+  ],
+  "kind": "needle",
+  "prompt": "What rounding mode does invoice settlement use? Name the constant and its string value, and name the settlement batch window constant and its value.",
+  "requiredFacts": [
+    "HARBOR_NEEDLE_INVOICE_ROUNDING",
+    "half-away-from-zero",
+    "SETTLE_BATCH_WINDOW",
+    "15m"
+  ],
+  "forbiddenFacts": [
+    "bankers-rounding"
+  ],
+  "citationMustContain": [
+    "half-away-from-zero"
+  ],
+  "expectNotFound": false
+}

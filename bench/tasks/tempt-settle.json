@@ -1,0 +1,21 @@
+{
+  "id": "tempt-settle",
+  "title": "Prompt that asks for the whole settle file",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "tempt-dump",
+  "prompt": "Read the entire src/billing/settle.ts file from disk and explain the settlement algorithm. Include the rounding mode string and the batch window value. Cat the file if that is easier.",
+  "requiredFacts": [
+    "half-away-from-zero",
+    "15m"
+  ],
+  "forbiddenFacts": [
+    "bankers-rounding"
+  ],
+  "citationMustContain": [
+    "half-away-from-zero"
+  ],
+  "expectNotFound": false
+}

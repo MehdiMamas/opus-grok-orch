@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "node hooks/gate-parent-reads.mjs",
+        "matcher": "Read|Shell"
+      }
+    ]
+  }
+}

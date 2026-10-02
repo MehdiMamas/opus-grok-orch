@@ -1,0 +1,19 @@
+{
+  "id": "refund-threshold",
+  "title": "Manual refund review threshold",
+  "tiers": [
+    "full"
+  ],
+  "kind": "cross-file",
+  "prompt": "At what minor-unit amount does requestRefund call queueManualRefundReview? Name the threshold constant, the number, and the review function.",
+  "requiredFacts": [
+    "REFUND_REVIEW_THRESHOLD_MINOR",
+    "250000",
+    "queueManualRefundReview"
+  ],
+  "forbiddenFacts": [],
+  "citationMustContain": [
+    "250000"
+  ],
+  "expectNotFound": false
+}

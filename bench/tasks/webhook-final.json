@@ -1,0 +1,21 @@
+{
+  "id": "webhook-final",
+  "title": "Final webhook failure across modules",
+  "tiers": [
+    "smoke",
+    "core",
+    "full"
+  ],
+  "kind": "cross-file",
+  "prompt": "When a webhook delivery has used its last attempt, what is the max-attempt constant name, which function chooses the backoff delay, and which function notifies on the final failure?",
+  "requiredFacts": [
+    "WEBHOOK_MAX_ATTEMPTS",
+    "backoffForAttempt",
+    "notifyFinalWebhookFailure"
+  ],
+  "forbiddenFacts": [],
+  "citationMustContain": [
+    "notifyFinalWebhookFailure"
+  ],
+  "expectNotFound": false
+}

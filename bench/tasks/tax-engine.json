@@ -1,0 +1,20 @@
+{
+  "id": "tax-engine",
+  "title": "Tax engine versus vendor decoy",
+  "tiers": [
+    "full"
+  ],
+  "kind": "decoy",
+  "prompt": "Which tax engine does taxMinor consult? Name the constant and its value.",
+  "requiredFacts": [
+    "TAX_ENGINE",
+    "harbor-tax-table-2024"
+  ],
+  "forbiddenFacts": [
+    "stripe-tax-decoy"
+  ],
+  "citationMustContain": [
+    "harbor-tax-table-2024"
+  ],
+  "expectNotFound": false
+}

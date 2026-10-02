@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harbor file-reader benchmark</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f4ef;
+      --ink: #1c1915;
+      --muted: #5c564c;
+      --line: #d9d3c7;
+      --card: #fffdf8;
+      --good: #1f7a4d;
+      --bad: #a33b32;
+      --warn: #8a5a12;
+      --heat: #efe6d6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161411;
+        --ink: #f3efe6;
+        --muted: #b7b0a4;
+        --line: #3a342c;
+        --card: #221f1b;
+        --good: #7dcea0;
+        --bad: #e07a72;
+        --warn: #e0b15a;
+        --heat: #2c2823;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.45 "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 64px; }
+    h1 { font-size: 1.6rem; font-weight: 650; margin: 0 0 6px; }
+    h2 { font-size: 1.05rem; margin: 28px 0 10px; }
+    p { margin: 0; }
+    .lede { color: var(--muted); margin-bottom: 18px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    label { color: var(--muted); }
+    select, button {
+      font: inherit;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+    .card h3 { margin: 0 0 8px; font-size: 0.85rem; font-weight: 650; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
+    .metric { font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+    .sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+    .token-line { display: flex; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums; margin-top: 4px; }
+    .pass { color: var(--good); }
+    .fail { color: var(--bad); }
+    .banner {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--bad) 16%, var(--card));
+      color: var(--bad);
+    }
+    table { width: 100%; border-collapse: collapse; background: var(--card); }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: 0.78rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .flag {
+      display: inline-block;
+      min-width: 7.5rem;
+      margin: 2px 4px 2px 0;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--heat);
+      font-size: 0.78rem;
+    }
+    .flag.on { background: color-mix(in srgb, var(--bad) 22%, var(--card)); color: var(--bad); }
+    .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Harbor file-reader benchmark</h1>
+    <p class="lede">Before is <code>baseline</code> (Claude reads freely). After is <code>current</code> (file-reader, skill, and hook). A pass keeps quality within 5 points and cuts parent file bytes, with no harness failure.</p>
+    <div id="app"></div>
+  </main>
+  <script src="results.js"></script>
+  <script>
+    const HEAT = ["factMiss", "badCitation", "parentDump", "noDelegation"];
+    const data = window.BENCH_RESULTS || { runs: [], comparisons: [] };
+    const app = document.getElementById("app");
+
+    function num(value) {
+      return Math.round(value).toLocaleString();
+    }
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[ch]));
+    }
+
+    function runById(id) {
+      return data.runs.find((run) => run.id === id) || null;
+    }
+
+    function tokenCount(run, bucket, field) {
+      return run && run.medianUsage && run.medianUsage[bucket] ? run.medianUsage[bucket][field] || 0 : 0;
+    }
+
+    function hasUsage(run) {
+      return Boolean(run && run.medianUsage);
+    }
+
+    function tokenSide(run, bucket, field) {
+      if (!hasUsage(run)) return "no usage data";
+      return num(tokenCount(run, bucket, field));
+    }
+
+    function tokenCard(title, bucket, before, after) {
+      const fields = [
+        ["Input", "inputTokens"],
+        ["Output", "outputTokens"],
+        ["Cache read", "cacheReadTokens"],
+        ["Cache write", "cacheWriteTokens"],
+      ];
+      if (!hasUsage(before) && !hasUsage(after)) {
+        return `<div class="card"><h3>${esc(title)}</h3><div class="sub">no usage data</div></div>`;
+      }
+      return `<div class="card"><h3>${esc(title)}</h3>${fields.map(([label, field]) =>
+        `<div class="token-line"><span>${label}</span><span>${tokenSide(before, bucket, field)} → ${tokenSide(after, bucket, field)}</span></div>`,
+      ).join("")}</div>`;
+    }
+
+    function bucketUsed(run, bucket) {
+      if (!hasUsage(run)) return false;
+      const counts = run.medianUsage[bucket];
+      if (!counts) return false;
+      return Boolean(counts.inputTokens || counts.outputTokens || counts.cacheReadTokens || counts.cacheWriteTokens);
+    }
+
+    function totalTokens(run) {
+      if (!hasUsage(run)) return null;
+      const fields = ["inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens"];
+      return fields.reduce((sum, field) =>
+        sum + tokenCount(run, "claude", field) + tokenCount(run, "grok", field) + tokenCount(run, "unattributed", field), 0);
+    }
+
+    function totalCard(before, after) {
+      if (!hasUsage(before) && !hasUsage(after)) {
+        return `<div class="card"><h3>Total tokens</h3><div class="sub">no usage data</div></div>`;
+      }
+      const left = hasUsage(before) ? num(totalTokens(before)) : "no usage data";
+      const right = hasUsage(after) ? num(totalTokens(after)) : "no usage data";
+      return `<div class="card"><h3>Total tokens</h3><div class="metric">${left} → ${right}</div><div class="sub">Input includes cache reads.</div></div>`;
+    }
+
+    function flags(task, names) {
+      return names.map((name) => {
+        const on = task && task.flags && task.flags.includes(name);
+        return `<span class="flag${on ? " on" : ""}">${esc(name)}</span>`;
+      }).join("");
+    }
+
+    function taskRow(beforeRun, afterRun, taskId) {
+      const before = beforeRun && beforeRun.tasks.find((task) => task.taskId === taskId);
+      const after = afterRun && afterRun.tasks.find((task) => task.taskId === taskId);
+      const title = (after || before || {}).title || "";
+      return `<tr>
+        <td>${esc(taskId)}<div class="sub">${esc(title)}</div></td>
+        <td>${flags(before, HEAT)}</td>
+        <td>${flags(after, HEAT)}</td>
+      </tr>`;
+    }
+
+    function render(tier) {
+      const comparison = data.comparisons.find((item) => item.tier === tier) || null;
+      const runs = [...data.runs].reverse();
+      if (!comparison) {
+        app.innerHTML = `<div class="empty">No before/after pair for this tier yet. Run <code>npm run bench:smoke</code> or the core command in bench/README.md.</div>`;
+        return;
+      }
+      const before = runById(comparison.beforeId);
+      const after = runById(comparison.afterId);
+      const tiers = [...new Set(data.comparisons.map((item) => item.tier))];
+      const taskIds = [...new Set([...(before?.tasks || []), ...(after?.tasks || [])].map((task) => task.taskId))];
+      const failOpen = after && after.failOpens > 0
+        ? `<div class="banner">Hook fail-opened ${after.failOpens} time${after.failOpens === 1 ? "" : "s"} on the after run. A crash fail-opens into a full read.</div>`
+        : "";
+      app.innerHTML = `
+        <div class="row">
+          <label for="tier">Tier</label>
+          <select id="tier">${tiers.map((name) => `<option${name === tier ? " selected" : ""}>${esc(name)}</option>`).join("")}</select>
+          <strong class="${comparison.passed ? "pass" : "fail"}">${comparison.passed ? "Pass" : "Fail"}${comparison.reasons.length ? `: ${esc(comparison.reasons.join(", "))}` : ""}</strong>
+        </div>
+        ${failOpen}
+        <div class="cards" style="margin-top:14px">
+          <div class="card"><h3>Quality</h3><div class="metric">${comparison.beforeQuality.toFixed(1)} → ${comparison.afterQuality.toFixed(1)}</div><div class="sub">delta ${comparison.qualityDelta.toFixed(1)}</div></div>
+          <div class="card"><h3>Parent file bytes</h3><div class="metric">${num(comparison.beforeParentFileBytes)} → ${num(comparison.afterParentFileBytes)}</div><div class="sub">delta ${num(comparison.parentFileBytesDelta)}</div></div>
+          ${tokenCard("Claude tokens", "claude", before, after)}
+          ${tokenCard("Grok tokens", "grok", before, after)}
+          ${(bucketUsed(before, "unattributed") || bucketUsed(after, "unattributed")) ? tokenCard("Unattributed tokens", "unattributed", before, after) : ""}
+          ${totalCard(before, after)}
+          <div class="card"><h3>Duration</h3><div class="metric">${num((before?.medianDurationMs || 0) / 1000)}s → ${num((after?.medianDurationMs || 0) / 1000)}s</div><div class="sub">efficiency ${before ? before.efficiency.toFixed(2) : "0"} → ${after ? after.efficiency.toFixed(2) : "0"}</div></div>
+        </div>
+        <h2>Tasks</h2>
+        <table>
+          <thead><tr><th>Task</th><th>Before</th><th>After</th></tr></thead>
+          <tbody>${taskIds.map((id) => taskRow(before, after, id)).join("")}</tbody>
+        </table>
+        <h2>Saved runs</h2>
+        <table>
+          <thead><tr><th>When</th><th>Variant</th><th>Tier</th><th class="num">Quality</th><th class="num">Bytes</th><th class="num">Cache write</th><th class="num">Duration</th><th class="num">Efficiency</th><th>Flags</th></tr></thead>
+          <tbody>${runs.map((run) => `<tr>
+            <td>${esc(run.createdAt)}</td>
+            <td>${esc(run.variant)}</td>
+            <td>${esc(run.tier)}</td>
+            <td class="num">${run.medianQuality.toFixed(1)}</td>
+            <td class="num">${num(run.medianParentFileBytes)}</td>
+            <td class="num">${num(run.medianCacheWriteTokens)}</td>
+            <td class="num">${num(run.medianDurationMs / 1000)}s</td>
+            <td class="num">${run.efficiency.toFixed(2)}</td>
+            <td>${run.harnessFailure ? '<span class="fail">harness</span> ' : ""}${run.regression ? '<span class="fail">regression</span>' : ""}${run.failOpens ? ` <span class="fail">fail-open ${run.failOpens}</span>` : ""}</td>
+          </tr>`).join("")}</tbody>
+        </table>
+      `;
+      document.getElementById("tier").addEventListener("change", (event) => render(event.target.value));
+    }
+
+    if (!data.runs.length) {
+      app.innerHTML = `<div class="empty">No results yet. From the repo root run <code>npm test</code>, then <code>npm run bench:smoke</code> with <code>CURSOR_API_KEY</code> set. This page reads <code>results.js</code>, which the runner writes beside it.</div>`;
+    } else {
+      const newest = [...data.runs].sort((a, b) => a.createdAt < b.createdAt ? 1 : -1)[0];
+      const tier = data.comparisons.some((item) => item.tier === newest.tier)
+        ? newest.tier
+        : (data.comparisons[0] && data.comparisons[0].tier) || newest.tier;
+      render(tier);
+    }
+  </script>
+</body>
+</html>

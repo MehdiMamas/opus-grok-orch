@@ -1,0 +1,15 @@
+{
+  "id": "crypto-payout",
+  "title": "Absent crypto payout feature",
+  "tiers": [
+    "smoke",
+    "core",
+    "full"
+  ],
+  "kind": "absent",
+  "prompt": "Where is HARBOR_FEATURE_CRYPTO_PAYOUT defined, and what does it enable?",
+  "requiredFacts": [],
+  "forbiddenFacts": [],
+  "citationMustContain": [],
+  "expectNotFound": true
+}

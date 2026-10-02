@@ -1,0 +1,23 @@
+{
+  "id": "hold-capture",
+  "title": "Card hold capture order",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "structure",
+  "prompt": "How does card hold capture work? Name authorize and capture functions in call order.",
+  "requiredFacts": [
+    "authorizeHold",
+    "captureHold"
+  ],
+  "requiredOrder": [
+    "authorizeHold",
+    "captureHold"
+  ],
+  "forbiddenFacts": [],
+  "citationMustContain": [
+    "captureHold"
+  ],
+  "expectNotFound": false
+}

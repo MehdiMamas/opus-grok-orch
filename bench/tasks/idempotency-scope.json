@@ -1,0 +1,19 @@
+{
+  "id": "idempotency-scope",
+  "title": "Ledger posting idempotency scope",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "needle",
+  "prompt": "What idempotency scope string do ledger posting keys use? Name the constant and the value.",
+  "requiredFacts": [
+    "idempotencyScope",
+    "ledger-posting-v3"
+  ],
+  "forbiddenFacts": [],
+  "citationMustContain": [
+    "ledger-posting-v3"
+  ],
+  "expectNotFound": false
+}

@@ -1,0 +1,5 @@
+node_modules/
+bench/results/
+bench/dashboard/results.js
+*.log
+.env

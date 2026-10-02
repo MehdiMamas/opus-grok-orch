@@ -1,0 +1,20 @@
+{
+  "id": "business-timezone",
+  "title": "Business timezone versus fallback decoy",
+  "tiers": [
+    "full"
+  ],
+  "kind": "decoy",
+  "prompt": "Which IANA timezone does businessNow format with? Name the constant and the value.",
+  "requiredFacts": [
+    "BUSINESS_TIMEZONE",
+    "America/Chicago"
+  ],
+  "forbiddenFacts": [
+    "FALLBACK_TIMEZONE_DECOY"
+  ],
+  "citationMustContain": [
+    "America/Chicago"
+  ],
+  "expectNotFound": false
+}

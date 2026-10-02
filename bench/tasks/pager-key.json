@@ -1,0 +1,19 @@
+{
+  "id": "pager-key",
+  "title": "Short pager routing file",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "small-slice",
+  "prompt": "What pager routing key does the on-call pager use? Name the constant and the value.",
+  "requiredFacts": [
+    "PAGER_ROUTING_KEY",
+    "harbor-oncall-primary"
+  ],
+  "forbiddenFacts": [],
+  "citationMustContain": [
+    "harbor-oncall-primary"
+  ],
+  "expectNotFound": false
+}

@@ -1,0 +1,18 @@
+{
+  "name": "opus-grok-orch",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:corpus": "node bench/src/generate-corpus.mjs",
+    "typecheck:corpus": "tsc -p bench/corpus --noEmit",
+    "test": "node --test --test-concurrency=1 bench/src/decide.test.ts bench/src/score.test.ts",
+    "bench": "node bench/src/run.ts",
+    "bench:smoke": "node bench/src/run.ts --tier smoke"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.35"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

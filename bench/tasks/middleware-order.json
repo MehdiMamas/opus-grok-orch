@@ -1,0 +1,24 @@
+{
+  "id": "middleware-order",
+  "title": "Incoming auth check order",
+  "tiers": [
+    "full"
+  ],
+  "kind": "structure",
+  "prompt": "What is the order of checks inside authorizeIncoming? Name the three functions in call order.",
+  "requiredFacts": [
+    "authenticateRequest",
+    "requireTenant",
+    "authorizeScope"
+  ],
+  "requiredOrder": [
+    "authenticateRequest",
+    "requireTenant",
+    "authorizeScope"
+  ],
+  "forbiddenFacts": [],
+  "citationMustContain": [
+    "authorizeIncoming"
+  ],
+  "expectNotFound": false
+}

@@ -1,0 +1,21 @@
+{
+  "id": "currency-storage",
+  "title": "Posting storage unit versus a lying comment",
+  "tiers": [
+    "core",
+    "full"
+  ],
+  "kind": "comment-lie",
+  "prompt": "How are ledger posting amounts stored? Name the storage constant and its value. A nearby comment may disagree with the code. Follow the code.",
+  "requiredFacts": [
+    "CURRENCY_STORAGE",
+    "minor-units"
+  ],
+  "forbiddenFacts": [
+    "major-units"
+  ],
+  "citationMustContain": [
+    "minor-units"
+  ],
+  "expectNotFound": false
+}
